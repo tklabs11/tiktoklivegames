@@ -1,0 +1,12 @@
+{
+  "id": "chat-war-live",
+  "name": "CHAT WAR LIVE",
+  "description": "Arena de combate com participantes do chat e eventos de presentes.",
+  "runtime": "node",
+  "bridge": "server.js",
+  "screen": "index.html",
+  "admin": null,
+  "events": "comment, gift",
+  "port": 8082,
+  "version": "legacy-preview"
+}

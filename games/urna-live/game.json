@@ -1,0 +1,12 @@
+{
+  "id": "urna-live",
+  "name": "URNA LIVE",
+  "description": "Simulador fictício de votação com presentes TikTok LIVE. Rosa (5655) = 13; White Rose (10602) = 22.",
+  "bridge": "tiktok_bridge.py",
+  "screen": "index.html",
+  "admin": "admin.html",
+  "version": "22.0",
+  "runtime": "python",
+  "events": "gift",
+  "port": 8080
+}

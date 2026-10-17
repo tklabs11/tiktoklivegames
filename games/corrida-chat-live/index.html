@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1018" />
+  <title>Corrida do Chat</title>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="manifest" href="./manifest.json?v=20260908" />
+  <link rel="stylesheet" href="./styles.css?v=20260908" />
+  <link rel="stylesheet" href="./mode.css?v=20260908" />
+</head>
+<body>
+  <main class="app-shell" data-mode="menu">
+    <section class="game-frame">
+      <canvas id="raceCanvas" width="540" height="960" aria-label="Corrida do Chat"></canvas>
+      <div id="modeMenu" class="mode-menu">
+        <span class="menu-kicker">TK // LIVE ARCADE</span>
+        <h2>Corrida do Chat</h2>
+        <p>Escolha como quer abrir a arena.</p>
+        <button id="demoModeButton" class="primary wide">Modo Demo</button>
+        <button id="liveModeButton" class="live-button wide">TikTok LIVE</button>
+        <small>Demo para testar localmente. Live para receber chat e presentes.</small>
+      </div>
+      <div id="countdown" class="countdown" aria-live="polite"></div>
+      <div id="results" class="results hidden" aria-live="polite"></div>
+    </section>
+    <aside id="testPanel" class="test-panel hidden" aria-label="Painel de teste">
+      <div class="panel-heading"><span>TK // RACE LAB</span><span class="live-status">● DEMO</span></div>
+      <h1>Corrida do Chat</h1>
+      <p class="panel-copy">Adicione pilotos, ative poderes e veja a ordem mudar pela distância real na pista.</p>
+      <label class="field-label" for="playerName">Nome do piloto</label>
+      <div class="join-row"><input id="playerName" value="TK" maxlength="12" /><button id="joinButton" class="primary">Entrar</button></div>
+      <div class="button-grid">
+        <button data-add="JOAO">+ JOAO</button><button data-add="MARIA">+ MARIA</button><button data-add="PEDRO">+ PEDRO</button><button data-add="LUCAS">+ LUCAS</button>
+      </div>
+      <div class="panel-divider"></div>
+      <p class="field-label">Poderes de teste</p>
+      <div class="power-grid">
+        <button data-power="turbo">⚡ Turbo</button><button data-power="nitro">🚀 Nitro</button><button data-power="shield">🛡 Escudo</button><button data-power="bomb">💣 Bomba</button><button data-power="magnet">🧲 Ímã</button><button data-power="push">🌀 Empurrão</button><button data-power="freeze">🧊 Congelar</button><button data-power="lightning">⚡ Raio</button>
+      </div>
+      <div class="panel-actions"><button id="startButton" class="primary wide">Nova corrida</button><button id="resetButton" class="ghost wide">Limpar pilotos</button></div>
+      <p id="eventLog" class="event-log">Aguardando pilotos...</p>
+      <p class="hint">Chat futuro: cada mensagem chamará <code>addPlayer(username)</code>. Presentes chamarão <code>usePower(type, username)</code>.</p>
+    </aside>
+  </main>
+  <script type="module" src="./app.js?v=20260908"></script>
+</body>
+</html>

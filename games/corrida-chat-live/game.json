@@ -1,0 +1,12 @@
+{
+  "id": "corrida-chat-live",
+  "name": "CORRIDA DO CHAT",
+  "description": "Corrida arcade com pilotos e poderes; integração TikTok ainda precisa de teste.",
+  "runtime": "node",
+  "bridge": "server.js",
+  "screen": "index.html",
+  "admin": null,
+  "events": "comment, gift",
+  "port": 3001,
+  "version": "legacy-preview"
+}

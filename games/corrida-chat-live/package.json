@@ -1,0 +1,14 @@
+{
+  "name": "corrida-chat-live",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "tiktok-live-connector": "^2.1.0",
+    "ws": "^8.18.0"
+  }
+}

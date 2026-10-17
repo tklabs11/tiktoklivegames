@@ -1,0 +1,20 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>URNA LIVE | Painel de controle</title><style>body{background:#0a1222;color:white;font:16px Arial;padding:28px;max-width:560px;margin:auto}button,input{font:inherit;padding:17px;border-radius:12px;border:0;margin:6px;cursor:pointer}button{background:#254a76;color:white;font-weight:bold}.blue{background:#087fc4}.red{background:#c62350}.row{display:flex;flex-wrap:wrap}p{color:#adbbd1;line-height:1.6}input{width:90px}</style><h1>🗳️ URNA LIVE — CONTROLE</h1><p>Este painel fica em uma janela separada. Capture somente o arquivo <b>index.html</b> no OBS ou TikTok LIVE Studio.</p><div class="row"><button class="blue" onclick="send('vote',22)">🤍 Rosa branca +1 (22)</button><button class="red" onclick="send('vote',13)">🌹 Rosa vermelha +1 (13)</button></div><div class="row"><button onclick="send('start')">▶ Iniciar</button><button onclick="send('pause')">⏸ Pausar</button><button onclick="send('reset')">↻ Reiniciar</button></div><p>Duração em minutos: <input type="number" id="minutes" min="1" max="60" value="5"><button onclick="channel.postMessage({type:'duration',seconds:Number(document.getElementById('minutes').value)*60})">Aplicar</button></p><p><b>Aviso:</b> os botões simulam presentes. A integração TikTok LIVE funciona quando o servidor tiktok_bridge.py está conectado. Para o painel se comunicar com a tela, abra ambos no mesmo navegador e origem (preferencialmente servidor local).</p><script>const channel=new BroadcastChannel('urna-live-v11');function send(type,side){channel.postMessage({type,side})}
+let lastGiftCursor = 0;
+async function refreshGifts(){
+ try {
+  const r = await fetch('/api/events?cursor='+lastGiftCursor,{cache:'no-store'});
+  if(!r.ok)return;
+  const data=await r.json();
+  document.getElementById('connection').textContent='TikTok: '+data.status.message;
+  for(const e of data.events){
+    if(e.type!=='gift')continue;
+    const line=document.createElement('div');
+    line.textContent=`@${e.sender} — ${e.name} (ID ${e.gift_id}) ×${e.count} → ${e.side || 'não configurado'}`;
+    document.getElementById('log').prepend(line);
+  }
+  while(document.getElementById('log').children.length>30)document.getElementById('log').lastChild.remove();
+  lastGiftCursor=data.cursor;
+ } catch(e){document.getElementById('connection').textContent='Ponte TikTok offline — controles manuais disponíveis';}
+}
+setInterval(refreshGifts,1000);refreshGifts();
+</script><h2 id="connection">Conectando à ponte...</h2><h3>Últimos presentes recebidos</h3><div id="log" style="font-size:14px;line-height:1.8;max-height:250px;overflow:auto"></div></html>

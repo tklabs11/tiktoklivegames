@@ -1,0 +1,12 @@
+{
+  "id": "pipa-live",
+  "name": "PIPA COMBAT LIVE",
+  "description": "Pipas surgem com mensagens no chat; presentes podem ativar poderes.",
+  "runtime": "node",
+  "bridge": "server.js",
+  "screen": "index.html",
+  "admin": null,
+  "events": "comment, gift",
+  "port": 3000,
+  "version": "legacy-preview"
+}

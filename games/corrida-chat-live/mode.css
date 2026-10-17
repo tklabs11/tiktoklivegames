@@ -1,0 +1,8 @@
+.mode-menu{position:absolute;inset:0;z-index:5;display:grid;align-content:center;gap:12px;padding:42px;background:linear-gradient(145deg,#07131fee,#11101fee 65%,#30152bef);text-align:center}.mode-menu h2{margin:0;color:var(--yellow);font-size:clamp(30px,8vw,54px);line-height:.9;text-transform:uppercase}.mode-menu p{color:#b4c5d2;margin:0 0 12px}.mode-menu small{color:#768897;line-height:1.5}.menu-kicker{color:var(--cyan);font:11px monospace;letter-spacing:.16em}.live-button{background:#a9274b!important;border-color:#ff477e!important;color:#fff!important}
+.mode-menu.hidden,#modeMenu[hidden]{display:none!important}
+.app-shell[data-mode="demo"] .mode-menu,
+.app-shell[data-mode="live"] .mode-menu,
+.app-shell[data-mode="countdown"] .mode-menu,
+.app-shell[data-mode="running"] .mode-menu,
+.app-shell[data-mode="finished"] .mode-menu{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+.app-shell[data-mode="menu"] .mode-menu{display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}

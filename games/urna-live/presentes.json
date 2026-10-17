@@ -1,0 +1,24 @@
+{
+  "presentes": {
+    "13": {
+      "nomes": [
+        "Rose",
+        "Rosa",
+        "Rosa vermelha",
+        "Red Rose"
+      ],
+      "ids": [
+        5655
+      ]
+    },
+    "22": {
+      "nomes": [
+        "White Rose",
+        "Rosa branca"
+      ],
+      "ids": [
+        10602
+      ]
+    }
+  }
+}

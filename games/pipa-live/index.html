@@ -1,0 +1,4861 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <!-- TK // creator mark -->
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#72c8f2">
+
+    <meta name="description" content="Arena de pipas interativa para TikTok LIVE">
+
+    <link rel="manifest" href="/manifest.json">
+
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+
+    <title>Pipa Combat Live</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        html,
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            overflow: hidden;
+
+            background: #111;
+
+            font-family: Arial, sans-serif;
+
+        }
+
+
+        body {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+        }
+
+
+        #game {
+
+            display: block;
+
+            background:
+                linear-gradient(
+                    #0a72d7 0%,
+                    #6ac0f5 52%,
+                    #b9dff5 72%,
+                    #f0d6a7 100%
+                );
+
+            box-shadow:
+                0 0 40px
+                rgba(0, 0, 0, 0.6);
+
+        }
+
+
+        #interface {
+
+            position: fixed;
+
+            top: 82px;
+
+            left: 50%;
+
+            transform:
+                translateX(-50%);
+
+            z-index: 10;
+
+            padding:
+                10px 18px;
+
+            background:
+                rgba(9, 18, 35, 0.82);
+
+            color: white;
+
+            border-radius: 12px;
+
+            font-size: 16px;
+
+            text-align: center;
+
+            pointer-events: none;
+
+            transition:
+                opacity 0.3s ease;
+
+            border: 1px solid rgba(255, 255, 255, 0.25);
+
+            box-shadow:
+                0 0 18px rgba(255, 255, 255, 0.18),
+                inset 0 0 14px rgba(255, 255, 255, 0.06);
+
+            font-weight: bold;
+
+            letter-spacing: 0.3px;
+
+        }
+
+
+        #interface.combate {
+
+            border-color: #ff4f91;
+
+            box-shadow:
+                0 0 10px #ff4f91,
+                0 0 28px rgba(255, 79, 145, 0.8),
+                inset 0 0 16px rgba(255, 79, 145, 0.18);
+
+            animation: pulso-combate 0.85s ease-out;
+
+        }
+
+
+        #cta-arena {
+            position: fixed;
+            left: 50%;
+            top: 38%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: min(86vw, 430px);
+            padding: 15px 22px 17px;
+            text-align: center;
+            border-radius: 16px;
+            background: rgba(12, 18, 35, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 24px rgba(142, 231, 255, 0.3), 0 0 38px rgba(255, 170, 73, 0.12);
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+            animation: pulse-cta 1.5s ease-in-out infinite;
+        }
+
+        #cta-arena.visible {
+            display: flex;
+        }
+
+        .cta-titulo {
+            font-size: clamp(20px, 2vw, 28px);
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            color: #ffd76a;
+            text-transform: uppercase;
+            text-shadow: 0 0 14px rgba(255, 215, 106, 0.6);
+        }
+
+        .cta-texto {
+            font-size: clamp(16px, 1.6vw, 24px);
+            color: #f2fbff;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(142, 231, 255, 0.4);
+        }
+
+        .cta-kicker {
+            color: #8ee7ff;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 0.2em;
+        }
+
+        .cta-beneficios {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 3px;
+        }
+
+        .cta-beneficios span {
+            padding: 6px 9px;
+            border: 1px solid rgba(142, 231, 255, 0.28);
+            border-radius: 999px;
+            color: rgba(242, 251, 255, 0.86);
+            font-size: 10px;
+            letter-spacing: 0.03em;
+        }
+
+        @keyframes pulso-combate {
+
+            0% {
+                transform: translateX(-50%) scale(0.82);
+                opacity: 0;
+            }
+
+            55% {
+                transform: translateX(-50%) scale(1.06);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-50%) scale(1);
+            }
+
+        }
+
+        @keyframes pulse-cta {
+
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(0.98);
+                box-shadow: 0 0 20px rgba(142, 231, 255, 0.25), 0 0 42px rgba(255, 170, 73, 0.14);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.02);
+                box-shadow: 0 0 28px rgba(142, 231, 255, 0.45), 0 0 56px rgba(255, 170, 73, 0.22);
+            }
+
+        }
+
+
+        #painel-live {
+
+            position: fixed;
+
+            right: 18px;
+
+            bottom: 18px;
+
+            z-index: 10;
+
+            width: 220px;
+
+            padding: 14px;
+
+            background: rgba(12, 24, 38, 0.88);
+
+            color: white;
+
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            border-radius: 14px;
+
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+
+            font-size: 13px;
+
+        }
+
+
+        #painel-live,
+        #placar-live {
+
+            display: none;
+
+        }
+
+
+        #placar-live {
+
+            position: fixed;
+
+            left: 18px;
+
+            bottom: 18px;
+
+            z-index: 10;
+
+            width: 190px;
+
+            padding: 13px;
+
+            background: rgba(12, 24, 38, 0.88);
+
+            color: white;
+
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            border-radius: 14px;
+
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+
+            font-size: 12px;
+
+        }
+
+
+        #placar-live strong {
+
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #ffd86b;
+
+            font-size: 14px;
+
+        }
+
+
+        #tempo-rodada {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #8ee7ff;
+
+            font-weight: bold;
+
+        }
+
+
+        #ranking-lista {
+
+            display: grid;
+
+            gap: 4px;
+
+        }
+
+
+        .ranking-vazio {
+
+            color: rgba(255, 255, 255, 0.58);
+
+        }
+
+
+        #painel-live strong {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-size: 15px;
+
+        }
+
+
+        #apoio-live {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-bottom: 10px;
+
+            color: #ffd86b;
+
+        }
+
+
+        #nome-apoiador {
+
+            width: 100%;
+
+            margin-bottom: 7px;
+
+            padding: 8px;
+
+            border: 0;
+
+            border-radius: 7px;
+
+            font: inherit;
+
+        }
+
+
+        .acao-presente {
+
+            width: 100%;
+
+            margin-top: 6px;
+
+            padding: 8px;
+
+            border: 0;
+
+            border-radius: 7px;
+
+            color: #142133;
+
+            background: #ffd86b;
+
+            cursor: pointer;
+
+            font: inherit;
+
+            font-weight: bold;
+
+        }
+
+
+        .acao-presente:hover {
+
+            background: #fff0ad;
+
+        }
+
+
+        @media (max-width: 700px) {
+
+            #painel-live {
+
+                right: 8px;
+
+                bottom: 8px;
+
+                width: 190px;
+
+                padding: 10px;
+
+            }
+
+            #placar-live {
+
+                left: 8px;
+
+                bottom: 8px;
+
+                width: 165px;
+
+                padding: 10px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div id="interface">
+    LIVE PRONTA · AGUARDANDO JOGADORES
+</div>
+
+<div id="cta-arena" aria-live="polite">
+    <span class="cta-kicker">PIPA COMBAT LIVE</span>
+    <span class="cta-titulo">💬 ENTRE NA ARENA</span>
+    <span class="cta-texto">Digite qualquer coisa para soltar sua pipa!</span>
+    <div class="cta-beneficios">
+        <span>💬 Chat = pipa</span>
+        <span>🎁 Presente = poder</span>
+    </div>
+</div>
+
+
+<section id="painel-live" aria-label="Painel da live">
+    <strong>Live TikTok</strong>
+    <div id="apoio-live">
+        <span id="status-live">Conectando...</span>
+        <span id="contador-apoio">0</span>
+    </div>
+    <div id="ultimo-presente">Aguardando presentes...</div>
+</section>
+
+
+<section id="placar-live" aria-label="Ranking da rodada">
+    <strong>🏆 Rodada <span id="numero-rodada">1</span></strong>
+    <span id="tempo-rodada">03:00 restantes</span>
+    <div id="ranking-lista">
+        <span class="ranking-vazio">Aguardando cortes...</span>
+    </div>
+</section>
+
+
+<canvas id="game"></canvas>
+
+
+<script>
+
+if ("serviceWorker" in navigator) {
+
+    navigator.serviceWorker
+        .register("/sw.js")
+        .then(registro => {
+
+            registro.update();
+
+            navigator.serviceWorker.addEventListener(
+                "controllerchange",
+                function() {
+
+                    if (window.pwaAtualizando) {
+
+                        return;
+
+                    }
+
+                    window.pwaAtualizando = true;
+                    window.location.reload();
+
+                },
+                { once: true }
+            );
+
+        });
+
+}
+
+
+// =====================================================
+// CANVAS
+// =====================================================
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+const interfaceTexto =
+    document.getElementById("interface");
+
+const statusLive =
+    document.getElementById("status-live");
+
+const ultimoPresente =
+    document.getElementById("ultimo-presente");
+
+const contadorApoio =
+    document.getElementById("contador-apoio");
+
+const ctaArena =
+    document.getElementById("cta-arena");
+
+const appConfig = {
+    enableBots: true,
+    showParticipationPrompt: true
+};
+
+let apoioTotal = 0;
+
+let climaAtual =
+    "ceu";
+
+let ventoAtual =
+    0;
+
+let fimClima =
+    0;
+
+const numeroRodada =
+    document.getElementById("numero-rodada");
+
+const tempoRodadaTexto =
+    document.getElementById("tempo-rodada");
+
+const rankingLista =
+    document.getElementById("ranking-lista");
+
+const DURACAO_RODADA =
+    180;
+
+let rodada = 1;
+
+let segundosRodada =
+    DURACAO_RODADA;
+
+let ultimoRelogio =
+    Date.now();
+
+const pontuacao =
+    new Map();
+
+const notificacoes = [];
+
+let ultimoRival =
+    Date.now() - 18000;
+
+let comboCortes = 0;
+
+let ultimoCorteArena =
+    0;
+
+let cortesNaRodada =
+    0;
+
+let modoGuerraDisparado =
+    false;
+
+let mapaAtual =
+    1;
+
+const votosMapa = {
+    1: 0,
+    2: 0
+};
+
+const votantesMapa =
+    new Set();
+
+const ultimoAtaquePorJogador =
+    new Map();
+
+const INTERVALO_ATAQUE_MS =
+    8000;
+
+let impactoTela =
+    0;
+
+let escalaTempo =
+    1;
+
+let frameJogo =
+    0;
+
+const poderes = [
+
+    "PIPA EXTRA",
+
+    "ESCUDO",
+
+    "CURA",
+
+    "VENTO",
+
+    "ATAQUE RELAMPAGO"
+
+];
+
+
+function registrarCorte(nome) {
+
+    if (!nome) {
+
+        return;
+
+    }
+
+    const agora =
+        Date.now();
+
+    comboCortes =
+        agora - ultimoCorteArena < 8000
+            ? comboCortes + 1
+            : 1;
+
+    ultimoCorteArena =
+        agora;
+
+    const pontos =
+        100 +
+        Math.max(0, comboCortes - 1) *
+        25;
+
+    pontuacao.set(
+        nome,
+        (pontuacao.get(nome) || 0) + pontos
+    );
+
+    adicionarNotificacao(
+        comboCortes > 1
+            ? `COMBO x${comboCortes}  +${pontos} pts`
+            : `Corte confirmado  +${pontos} pts`,
+        "#ffd86b"
+    );
+
+    impactoTela =
+        16;
+
+    escalaTempo =
+        0.45;
+
+    atualizarRanking();
+
+    if (
+        cortesNaRodada > 0 &&
+        cortesNaRodada % 10 === 0 &&
+        !modoGuerraDisparado
+    ) {
+
+        iniciarModoGuerra();
+
+    }
+
+}
+
+
+function iniciarModoGuerra() {
+
+    modoGuerraDisparado =
+        true;
+
+    const boss =
+        criarPipa(
+            "PIPA DOURADA",
+            true
+        );
+
+    boss.rara =
+        true;
+
+    boss.tamanho =
+        42;
+
+    boss.vida =
+        180;
+
+    boss.vidaMaxima =
+        180;
+
+    boss.cor =
+        "#ffd34e";
+
+    boss.corLinha =
+        "#fff1a8";
+
+    adicionarNotificacao(
+        "👑 MODO GUERRA: PIPA DOURADA ENTROU!",
+        "#ffe36e"
+    );
+
+    mostrarAvisoCombate(
+        "👑 PIPA DOURADA: TODO MUNDO PODE ATACAR!"
+    );
+
+    for (let indice = 0; indice < 4; indice++) {
+
+        criarFaiscas(
+            boss.x,
+            boss.y
+        );
+
+    }
+
+}
+
+
+function aplicarPoderAleatorio(nome, repeticoes) {
+
+    const poder =
+        poderes[
+            Math.floor(
+                Math.random() * poderes.length
+            )
+        ];
+
+    const quantidade =
+        Math.max(1, repeticoes || 1);
+
+    adicionarNotificacao(
+        `🎁 ${nome} ganhou ${poder}!`,
+        "#ff9de2"
+    );
+
+    mostrarAvisoCombate(
+        `🎁 ${nome} ganhou: ${poder}`
+    );
+
+    if (poder === "PIPA EXTRA") {
+
+        for (let i = 0; i < Math.min(quantidade, 3); i++) {
+
+            criarPipa(nome);
+
+        }
+
+        registrarApoio(
+            quantidade,
+            `🪁 ${nome} ganhou PIPA EXTRA!`
+        );
+
+        return;
+
+    }
+
+    if (poder === "ESCUDO") {
+
+        receberPresenteEscudo(nome);
+
+        return;
+
+    }
+
+    if (poder === "CURA") {
+
+        curarPipa(nome);
+
+        return;
+
+    }
+
+    if (poder === "VENTO") {
+
+        ativarVento(nome);
+
+        return;
+
+    }
+
+    receberPresenteCorte(nome);
+
+}
+
+
+function adicionarNotificacao(texto, cor) {
+
+    notificacoes.push({
+
+        texto: texto,
+
+        cor: cor || "#ffffff",
+
+        vida: 150
+
+    });
+
+    if (notificacoes.length > 5) {
+
+        notificacoes.shift();
+
+    }
+
+}
+
+
+function atualizarRanking() {
+
+    const jogadores =
+        Array.from(pontuacao.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+
+    rankingLista.innerHTML = "";
+
+    if (!jogadores.length) {
+
+        const vazio =
+            document.createElement("span");
+
+        vazio.className =
+            "ranking-vazio";
+
+        vazio.textContent =
+            "Aguardando cortes...";
+
+        rankingLista.appendChild(vazio);
+
+        return;
+
+    }
+
+    jogadores.forEach(
+        (jogador, indice) => {
+
+            const linha =
+                document.createElement("span");
+
+            linha.textContent =
+                `${indice + 1}. ${jogador[0]}  ${jogador[1]} pts`;
+
+            rankingLista.appendChild(linha);
+
+        }
+    );
+
+}
+
+
+function iniciarNovaRodada() {
+
+    const vencedor =
+        Array.from(pontuacao.entries())
+            .sort((a, b) => b[1] - a[1])[0];
+
+    mostrarAvisoCombate(
+        vencedor
+            ? `🏆 ${vencedor[0]} venceu a rodada!`
+            : "🏆 Rodada encerrada!"
+    );
+
+    for (let indice = 0; indice < 8; indice++) {
+
+        criarFaiscas(
+            60 + Math.random() * (canvas.width - 120),
+            120 + Math.random() * 260
+        );
+
+    }
+
+    if (votosMapa[1] || votosMapa[2]) {
+
+        mapaAtual =
+            votosMapa[2] > votosMapa[1]
+                ? 2
+                : 1;
+
+        adicionarNotificacao(
+            `🗺️ Mapa ${mapaAtual} venceu a votação!`,
+            mapaAtual === 2
+                ? "#bcd7ff"
+                : "#ffe08a"
+        );
+
+    }
+
+    pipas.forEach(
+        pipa => {
+            pipa.ativa = false;
+        }
+    );
+
+    pontuacao.clear();
+    cortesNaRodada = 0;
+    modoGuerraDisparado = false;
+    votosMapa[1] = 0;
+    votosMapa[2] = 0;
+    votantesMapa.clear();
+    rodada++;
+    segundosRodada = DURACAO_RODADA;
+    numeroRodada.textContent = rodada;
+    atualizarRanking();
+
+}
+
+
+function votarMapa(nome, mapa) {
+
+    const chave =
+        nome.toLowerCase();
+
+    if (votantesMapa.has(chave)) {
+
+        mostrarAvisoCombate(
+            "🗳️ " + nome + " já votou nesta rodada!"
+        );
+
+        return;
+
+    }
+
+    votantesMapa.add(chave);
+    votosMapa[mapa]++;
+
+    adicionarNotificacao(
+        `🗳️ ${nome} votou no mapa ${mapa}`,
+        "#8ee7ff"
+    );
+
+    mostrarAvisoCombate(
+        `Mapa ${mapa} recebeu um voto!`
+    );
+
+}
+
+
+function atualizarRelogioRodada() {
+
+    const agora =
+        Date.now();
+
+    const decorrido =
+        Math.floor(
+            (agora - ultimoRelogio) /
+            1000
+        );
+
+    if (decorrido < 1) {
+
+        return;
+
+    }
+
+    ultimoRelogio = agora;
+    segundosRodada -= decorrido;
+
+    if (segundosRodada <= 0) {
+
+        iniciarNovaRodada();
+
+    }
+
+    const minutos =
+        Math.floor(segundosRodada / 60)
+            .toString()
+            .padStart(2, "0");
+
+    const segundos =
+        Math.max(0, segundosRodada % 60)
+            .toString()
+            .padStart(2, "0");
+
+    tempoRodadaTexto.textContent =
+        `${minutos}:${segundos} restantes`;
+
+}
+
+
+// =====================================================
+// CONFIGURAÇÃO DA ARENA
+// =====================================================
+
+const ARENA_LARGURA = 540;
+
+const ARENA_ALTURA = 960;
+
+
+// =====================================================
+// TAMANHO DO CANVAS
+// =====================================================
+
+function ajustarTela() {
+
+    const proporcao =
+        ARENA_LARGURA /
+        ARENA_ALTURA;
+
+
+    let largura =
+        window.innerWidth;
+
+    let altura =
+        window.innerHeight;
+
+
+    // Mantém proporção 9:16
+
+    if (
+        largura / altura >
+        proporcao
+    ) {
+
+        largura =
+            altura * proporcao;
+
+    } else {
+
+        altura =
+            largura / proporcao;
+
+    }
+
+
+    canvas.width =
+        ARENA_LARGURA;
+
+    canvas.height =
+        ARENA_ALTURA;
+
+
+    canvas.style.width =
+        largura + "px";
+
+    canvas.style.height =
+        altura + "px";
+
+}
+
+
+ajustarTela();
+
+
+window.addEventListener(
+    "resize",
+    ajustarTela
+);
+
+
+// =====================================================
+// PIPAS
+// =====================================================
+
+const pipas = [];
+
+
+// =====================================================
+// CORES
+// =====================================================
+
+const cores = [
+
+    "#ff3030",
+
+    "#3030ff",
+
+    "#30b85a",
+
+    "#ffd21f",
+
+    "#b030d0",
+
+    "#ff711f",
+
+    "#00a9c7",
+
+    "#ff4f91"
+
+];
+
+
+const coresLinhas = [
+
+    "#263238",
+
+    "#ffffff",
+
+    "#ffea00",
+
+    "#ff7043",
+
+    "#69f0ae",
+
+    "#ce93d8"
+
+];
+
+
+const skins = [
+
+    "classica",
+
+    "listrada",
+
+    "estrela",
+
+    "bolinha"
+
+];
+
+
+const formatosPipa = [
+
+    "combate",
+
+    "combate",
+
+    "arraia",
+
+    "papagaio",
+
+    "hexagonal"
+
+];
+
+const MAX_PIPAS_ATIVAS = 45;
+
+
+// =====================================================
+// EFEITOS
+// =====================================================
+
+const efeitos = [];
+
+let contextoAudio = null;
+
+
+function prepararAudio() {
+
+    if (!window.AudioContext) {
+
+        return;
+
+    }
+
+    if (!contextoAudio) {
+
+        contextoAudio =
+            new AudioContext();
+
+    }
+
+
+    if (contextoAudio.state === "suspended") {
+
+        contextoAudio.resume();
+
+    }
+
+}
+
+
+function tocarSomCorte() {
+
+    try {
+
+        prepararAudio();
+
+        const agora =
+            contextoAudio.currentTime;
+
+        const oscilador =
+            contextoAudio.createOscillator();
+
+        const ganho =
+            contextoAudio.createGain();
+
+        oscilador.type =
+            "sawtooth";
+
+        oscilador.frequency.setValueAtTime(
+            880,
+            agora
+        );
+
+        oscilador.frequency.exponentialRampToValueAtTime(
+            180,
+            agora + 0.22
+        );
+
+        ganho.gain.setValueAtTime(
+            0.0001,
+            agora
+        );
+
+        ganho.gain.exponentialRampToValueAtTime(
+            0.18,
+            agora + 0.015
+        );
+
+        ganho.gain.exponentialRampToValueAtTime(
+            0.0001,
+            agora + 0.25
+        );
+
+        oscilador.connect(ganho);
+        ganho.connect(contextoAudio.destination);
+        oscilador.start(agora);
+        oscilador.stop(agora + 0.26);
+
+    } catch (erro) {
+
+        console.warn(
+            "Áudio de corte indisponível:",
+            erro
+        );
+
+    }
+
+}
+
+
+window.addEventListener(
+    "pointerdown",
+    prepararAudio,
+    { once: true }
+);
+
+let avisoCombate = 0;
+
+
+async function carregarConfiguracaoApp() {
+    try {
+        const resposta = await fetch("/config");
+
+        if (!resposta.ok) {
+            return;
+        }
+
+        const configuracao = await resposta.json();
+
+        appConfig.enableBots = configuracao.enableBots !== false;
+        appConfig.showParticipationPrompt = configuracao.showParticipationPrompt !== false;
+    } catch (erro) {
+        console.warn("Não foi possível carregar a configuração do app:", erro);
+    }
+}
+
+function atualizarPromptParticipacao() {
+    if (!appConfig.showParticipationPrompt) {
+        ctaArena.classList.remove("visible");
+        return;
+    }
+
+    const temPipaAtiva = pipas.some(
+        pipa => pipa.ativa && !pipa.cortada
+    );
+
+    if (temPipaAtiva) {
+        ctaArena.classList.remove("visible");
+        return;
+    }
+
+    ctaArena.classList.add("visible");
+}
+
+function mostrarAvisoCombate(mensagem) {
+
+    interfaceTexto.textContent =
+        mensagem;
+
+    interfaceTexto.classList.remove(
+        "combate"
+    );
+
+    void interfaceTexto.offsetWidth;
+
+    interfaceTexto.classList.add(
+        "combate"
+    );
+
+    avisoCombate =
+        100;
+
+}
+
+
+function registrarApoio(valor, mensagem) {
+
+    apoioTotal += valor;
+
+    contadorApoio.textContent =
+        apoioTotal;
+
+    interfaceTexto.textContent =
+        mensagem;
+
+    setTimeout(
+        function() {
+
+            interfaceTexto.textContent =
+                "LIVE PRONTA · AGUARDANDO JOGADORES";
+
+        },
+        1800
+    );
+
+}
+
+
+function ativarClima(tipo, duracao) {
+
+    climaAtual =
+        tipo;
+
+    fimClima =
+        Date.now() + duracao;
+
+    ventoAtual =
+        tipo === "vento"
+            ? 0.045
+            : 0;
+
+}
+
+
+function atualizarClima() {
+
+    if (
+        climaAtual !== "ceu" &&
+        Date.now() > fimClima
+    ) {
+
+        climaAtual =
+            "ceu";
+
+        ventoAtual =
+            0;
+
+    }
+
+}
+
+
+function curarPipa(nome) {
+
+    const pipa =
+        pipaAtivaAleatoria();
+
+    if (!pipa) {
+
+        return;
+
+    }
+
+    pipa.vida =
+        Math.min(
+            pipa.vidaMaxima,
+            pipa.vida + 30
+        );
+
+    registrarApoio(
+        15,
+        "💚 " + nome + " curou " + pipa.nome + "!"
+    );
+
+}
+
+
+function ativarVento(nome) {
+
+    ativarClima(
+        "vento",
+        15000
+    );
+
+    registrarApoio(
+        20,
+        "🌪️ " + nome + " invocou vento forte!"
+    );
+
+}
+
+
+// =====================================================
+// CRIAR PIPA
+// =====================================================
+
+function criarPipa(nome, rival) {
+
+    const tamanho = 32;
+
+
+    const margem = 70;
+
+
+    const pipa = {
+
+        nome: nome,
+
+        rival: rival === true,
+
+
+        // posição da pipa
+
+        x:
+            margem +
+            Math.random() *
+            (
+                canvas.width -
+                margem * 2
+            ),
+
+
+        y:
+            100 +
+            Math.random() *
+            500,
+
+
+        // velocidade
+
+        velocidadeX:
+            (Math.random() * 2.5) -
+            1.25,
+
+
+        velocidadeY:
+            (Math.random() * 2) -
+            1,
+
+
+        faseVoo:
+            Math.random() * Math.PI * 2,
+
+
+        angulo:
+            (Math.random() - 0.5) * 0.14,
+
+
+        velocidadeAngular:
+            (Math.random() - 0.5) * 0.008,
+
+
+        // tamanho
+
+        tamanho: tamanho,
+
+
+        tamanhoOriginal: tamanho,
+
+
+        // aparência
+
+        cor:
+            cores[
+                Math.floor(
+                    Math.random() *
+                    cores.length
+                )
+            ],
+
+
+        corLinha:
+            coresLinhas[
+                Math.floor(
+                    Math.random() *
+                    coresLinhas.length
+                )
+            ],
+
+
+        skin:
+            skins[
+                Math.floor(
+                    Math.random() *
+                    skins.length
+                )
+            ],
+
+
+        formato:
+            formatosPipa[
+                Math.floor(
+                    Math.random() *
+                    formatosPipa.length
+                )
+            ],
+
+
+        vida: 100,
+
+        vidaMaxima: 100,
+
+        danoFlash: 0,
+
+
+        // posição fixa da linha
+
+        ancoraX:
+            0,
+
+
+        ancoraY:
+            canvas.height - 20,
+
+
+        // estado
+
+        ativa: true,
+
+        cortada: false,
+
+        protegida: false,
+
+
+        // animação de morte
+
+        alpha: 1,
+
+        tempoMorte: 0,
+
+
+        // evita múltiplos cortes
+
+        ultimoCorte: 0
+
+    };
+
+
+    // distribui as âncoras pela parte inferior
+
+    const quantidade =
+        pipas.length + 1;
+
+
+    pipa.ancoraX =
+        (
+            canvas.width /
+            (quantidade + 1)
+        ) *
+        quantidade;
+
+
+    const pipasAtivas =
+        pipas.filter(
+            pipaExistente =>
+                pipaExistente.ativa &&
+                !pipaExistente.cortada
+        );
+
+    if (pipasAtivas.length >= MAX_PIPAS_ATIVAS) {
+
+        pipasAtivas[0].ativa = false;
+
+    }
+
+    pipas.push(pipa);
+
+
+    reorganizarAncoras();
+
+
+    console.log(
+        "Pipa criada:",
+        nome
+    );
+
+    return pipa;
+
+}
+
+
+function criarRivalAutomatico() {
+
+    if (!appConfig.enableBots) {
+        return;
+    }
+
+    const ativas =
+        pipas.filter(
+            pipa => pipa.ativa && !pipa.cortada
+        );
+
+    if (
+        Date.now() - ultimoRival < 18000 ||
+        ativas.length >= 8
+    ) {
+
+        return;
+
+    }
+
+    ultimoRival =
+        Date.now();
+
+    const rivais = [
+    "Juninho Laje",
+    "Marquinhos",
+    "Pedrinho",
+    "Nelsinho",
+    "Cezar Chilena",
+    "Betinho Relo",
+    "Cleiton",
+    "Gordinho",
+    "Zé Dibuqui",
+    "Tonho",
+    "Mael Rabiola",
+    "Breno Puxadão",
+    "Luanzinho",
+    "Vaguinho",
+    "Carlinhos",
+    "Bruninho",
+    "Tiaguinho",
+    "Rafa Cerol",
+    "Magrão",
+    "Leandrinho",
+    "Fabinho"
+];
+
+    const rival =
+        rivais[
+            Math.floor(Math.random() * rivais.length)
+        ];
+
+    criarPipa(
+        rival,
+        true
+    );
+
+    adicionarNotificacao(
+        "⚔️ " + rival + " entrou no duelo!",
+        "#ff8b6b"
+    );
+
+}
+
+
+function pipaAtivaAleatoria() {
+
+    const ativas =
+        pipas.filter(
+            pipa =>
+                pipa.ativa &&
+                !pipa.cortada
+        );
+
+
+    if (!ativas.length) {
+
+        return null;
+
+    }
+
+
+    return ativas[
+        Math.floor(
+            Math.random() * ativas.length
+        )
+    ];
+
+}
+
+
+function atacarPipaMaisProxima(nome) {
+
+    const agora =
+        Date.now();
+
+    const ultimoAtaque =
+        ultimoAtaquePorJogador.get(nome) ||
+        0;
+
+    if (agora - ultimoAtaque < INTERVALO_ATAQUE_MS) {
+
+        mostrarAvisoCombate(
+            "⏳ " + nome + " ainda está recarregando o ataque!"
+        );
+
+        return;
+
+    }
+
+    const atacante =
+        pipas.find(
+            pipa =>
+                pipa.ativa &&
+                !pipa.cortada &&
+                !pipa.rival &&
+                pipa.nome.toLowerCase() === nome.toLowerCase()
+        );
+
+    if (!atacante) {
+
+        mostrarAvisoCombate(
+            "🪁 " + nome + " precisa criar uma pipa primeiro!"
+        );
+
+        return;
+
+    }
+
+    const inimigas =
+        pipas.filter(
+            pipa =>
+                pipa.ativa &&
+                !pipa.cortada &&
+                pipa !== atacante
+        );
+
+    const alvo =
+        inimigas.sort(
+            (pipaA, pipaB) =>
+                distancia(atacante.x, atacante.y, pipaA.x, pipaA.y) -
+                distancia(atacante.x, atacante.y, pipaB.x, pipaB.y)
+        )[0];
+
+    if (!alvo) {
+
+        mostrarAvisoCombate(
+            "⚔️ Nenhuma pipa inimiga na arena!"
+        );
+
+        return;
+
+    }
+
+    ultimoAtaquePorJogador.set(
+        nome,
+        agora
+    );
+
+    criarFaiscas(
+        alvo.x,
+        alvo.y
+    );
+
+    causarDano(
+        alvo,
+        45,
+        atacante
+    );
+
+    adicionarNotificacao(
+        `⚔️ ${nome} atacou ${alvo.nome}`,
+        "#ff8b6b"
+    );
+
+    mostrarAvisoCombate(
+        `⚔️ ${nome} atacou ${alvo.nome}!`
+    );
+
+}
+
+
+function receberPresenteEscudo(nome) {
+
+    const pipa =
+        pipaAtivaAleatoria();
+
+
+    if (!pipa) {
+
+        return;
+
+    }
+
+
+    pipa.protegida = true;
+
+    registrarApoio(
+        5,
+        "🛡️ " + nome + " ativou um escudo para " + pipa.nome + "!"
+    );
+
+}
+
+
+function receberPresenteCorte(nome) {
+
+    const pipa =
+        pipaAtivaAleatoria();
+
+
+    if (!pipa) {
+
+        return;
+
+    }
+
+
+    cortarPipa(
+        pipa,
+        {
+            nome: nome,
+            rival: false
+        }
+    );
+
+    registrarApoio(
+        10,
+        "✂️ " + nome + " cortou a pipa de " + pipa.nome + "!"
+    );
+
+}
+
+
+function garantirPipaDoApoiador(nome) {
+
+    const pipaDoApoiador =
+        pipas.find(
+            pipa =>
+                pipa.ativa &&
+                !pipa.cortada &&
+                !pipa.rival &&
+                pipa.nome.toLowerCase() === nome.toLowerCase()
+        );
+
+    return pipaDoApoiador || criarPipa(nome);
+
+}
+
+
+function processarPresenteLive(evento) {
+
+    const nome =
+        evento.username ||
+        "Apoiador";
+
+    ultimoPresente.textContent =
+        nome +
+        " enviou " +
+        (evento.giftName || "um presente");
+
+    adicionarNotificacao(
+        "🎁 " + nome + " enviou " + (evento.giftName || "presente"),
+        "#ff9de2"
+    );
+
+    garantirPipaDoApoiador(nome);
+
+    aplicarPoderAleatorio(
+        nome,
+        evento.repeatCount || 1
+    );
+
+}
+
+
+function processarMensagemLive(evento) {
+
+    const nome =
+        evento.username ||
+        "Apoiador";
+
+
+    const comentario =
+        String(evento.comment || "").trim();
+
+    const comando =
+        comentario.toLowerCase();
+
+
+    if (comando === "!ranking") {
+
+        mostrarAvisoCombate(
+            "🏆 Ranking atualizado na arena!"
+        );
+
+        return;
+
+    }
+
+
+    if (comando === "!atacar") {
+
+        atacarPipaMaisProxima(nome);
+
+        return;
+
+    }
+
+
+    if (comando === "!vento") {
+
+        ativarVento(nome);
+
+        return;
+
+    }
+
+
+    if (comando === "!mapa1") {
+
+        votarMapa(nome, 1);
+
+        return;
+
+    }
+
+
+    if (comando === "!mapa2") {
+
+        votarMapa(nome, 2);
+
+        return;
+
+    }
+
+
+    if (!comentario) {
+
+        return;
+
+    }
+
+
+    criarPipa(nome);
+
+    adicionarNotificacao(
+        "💬 " + nome + " entrou na arena",
+        "#8ee7ff"
+    );
+
+    ultimoPresente.textContent =
+        nome +
+        " comentou: " +
+        comentario.slice(0, 28);
+
+    interfaceTexto.textContent =
+        "💬 " +
+        nome +
+        " ganhou uma pipa!";
+
+}
+
+
+// =====================================================
+// ORGANIZAR PONTOS DE ANCORAGEM
+// =====================================================
+
+function reorganizarAncoras() {
+
+    const pipasAtivas =
+        pipas.filter(
+            pipa =>
+                pipa.ativa
+        );
+
+
+    const espacamento =
+        canvas.width /
+        (
+            pipasAtivas.length + 1
+        );
+
+
+    pipasAtivas.forEach(
+        (pipa, indice) => {
+
+            pipa.ancoraX =
+                espacamento *
+                (indice + 1);
+
+            pipa.ancoraY =
+                canvas.height - 20;
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// MOVIMENTO DA PIPA
+// =====================================================
+
+function atualizarPipa(pipa) {
+
+    atualizarClima();
+
+    if (
+        pipa.cortada
+    ) {
+
+        atualizarPipaCortada(
+            pipa
+        );
+
+        return;
+
+    }
+
+
+    if (pipa.danoFlash > 0) {
+
+        pipa.danoFlash--;
+
+    }
+
+
+    const tempo =
+        Date.now() *
+        0.001;
+
+    const velocidadeLateral =
+        Math.sin(
+            tempo * 0.42 +
+            pipa.faseVoo
+        ) *
+        0.85;
+
+    const descidaSuave =
+        0.22 +
+        Math.sin(
+            tempo * 0.7 +
+            pipa.faseVoo
+        ) *
+        0.1;
+
+    pipa.velocidadeX +=
+        (velocidadeLateral + ventoAtual - pipa.velocidadeX) *
+        0.018;
+
+    pipa.velocidadeY +=
+        (descidaSuave - pipa.velocidadeY) *
+        0.012;
+
+    pipa.x +=
+        pipa.velocidadeX;
+
+
+    pipa.y +=
+        pipa.velocidadeY;
+
+
+    pipa.angulo +=
+        pipa.velocidadeAngular +
+        pipa.velocidadeX *
+        0.0008;
+
+    pipa.velocidadeAngular *=
+        0.995;
+
+
+    // limita velocidade
+
+    const velocidadeMaxima =
+        1.8;
+
+
+    if (
+        pipa.velocidadeX >
+        velocidadeMaxima
+    ) {
+
+        pipa.velocidadeX =
+            velocidadeMaxima;
+
+    }
+
+
+    if (
+        pipa.velocidadeX <
+        -velocidadeMaxima
+    ) {
+
+        pipa.velocidadeX =
+            -velocidadeMaxima;
+
+    }
+
+
+    if (
+        pipa.velocidadeY >
+        velocidadeMaxima
+    ) {
+
+        pipa.velocidadeY =
+            velocidadeMaxima;
+
+    }
+
+
+    if (
+        pipa.velocidadeY <
+        -velocidadeMaxima
+    ) {
+
+        pipa.velocidadeY =
+            -velocidadeMaxima;
+
+    }
+
+
+    // -----------------------------------------
+    // LIMITES
+    // -----------------------------------------
+
+    if (
+        pipa.x <
+        pipa.tamanho
+    ) {
+
+        pipa.x =
+            pipa.tamanho;
+
+        pipa.velocidadeX *= -1;
+
+    }
+
+
+    if (
+        pipa.x >
+        canvas.width -
+        pipa.tamanho
+    ) {
+
+        pipa.x =
+            canvas.width -
+            pipa.tamanho;
+
+        pipa.velocidadeX *= -1;
+
+    }
+
+
+    if (
+        pipa.y <
+        70
+    ) {
+
+        pipa.y =
+            70;
+
+        pipa.velocidadeY *= -1;
+
+    }
+
+
+    if (
+        pipa.y >
+        canvas.height -
+        220
+    ) {
+
+        pipa.y =
+            canvas.height -
+            220;
+
+        pipa.velocidadeY *= -1;
+
+    }
+
+}
+
+
+// =====================================================
+// MOVIMENTO DA PIPA CORTADA
+// =====================================================
+
+function atualizarPipaCortada(pipa) {
+
+    pipa.x +=
+        pipa.velocidadeX;
+
+
+    pipa.y +=
+        pipa.velocidadeY;
+
+
+    // depois de cortada,
+    // ela sobe
+
+    pipa.velocidadeY -=
+        0.015;
+
+
+    // começa a desacelerar
+
+    pipa.velocidadeX *=
+        0.998;
+
+
+    // diminui
+
+    pipa.tamanho *=
+        0.985;
+
+
+    // fade out
+
+    pipa.alpha *=
+        0.985;
+
+
+    pipa.tempoMorte++;
+
+
+    // remove quando desaparecer
+
+    if (
+
+        pipa.alpha < 0.03 ||
+
+        pipa.tamanho < 3 ||
+
+        pipa.tempoMorte > 240
+
+    ) {
+
+        pipa.ativa =
+            false;
+
+    }
+
+}
+
+
+// =====================================================
+// DESENHAR LINHA
+// =====================================================
+
+function desenharLinha(pipa) {
+
+    if (
+        pipa.cortada
+    ) {
+
+        return;
+
+    }
+
+
+    ctx.save();
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        pipa.ancoraX,
+        pipa.ancoraY
+    );
+
+
+    // pequena curva na linha
+
+    const meioX =
+        (
+            pipa.ancoraX +
+            pipa.x
+        ) / 2;
+
+
+    const meioY =
+        (
+            pipa.ancoraY +
+            pipa.y
+        ) / 2;
+
+
+    ctx.quadraticCurveTo(
+
+        meioX + 15,
+
+        meioY,
+
+        pipa.x,
+
+        pipa.y
+
+    );
+
+
+    ctx.strokeStyle =
+        pipa.corLinha;
+
+
+    ctx.lineWidth =
+        1.5;
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+}
+
+
+// =====================================================
+// DESENHAR ÂNCORA
+// =====================================================
+
+function desenharAncora(pipa) {
+
+    if (
+        pipa.cortada
+    ) {
+
+        return;
+
+    }
+
+
+    ctx.save();
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+
+        pipa.ancoraX,
+
+        pipa.ancoraY,
+
+        5,
+
+        0,
+
+        Math.PI * 2
+
+    );
+
+
+    ctx.fillStyle =
+        "#222";
+
+
+    ctx.fill();
+
+
+    ctx.restore();
+
+}
+
+
+// =====================================================
+// DESENHAR PIPA
+// =====================================================
+
+function criarCaminhoPipa(formato, tamanho) {
+
+    ctx.beginPath();
+
+    if (formato === "arraia") {
+
+        ctx.moveTo(0, -tamanho * 1.18);
+        ctx.lineTo(tamanho * 0.82, -tamanho * 0.08);
+        ctx.lineTo(tamanho * 0.56, tamanho * 0.7);
+        ctx.lineTo(0, tamanho);
+        ctx.lineTo(-tamanho * 0.56, tamanho * 0.7);
+        ctx.lineTo(-tamanho * 0.82, -tamanho * 0.08);
+
+    } else if (formato === "papagaio") {
+
+        ctx.moveTo(0, -tamanho * 1.18);
+        ctx.lineTo(tamanho * 0.95, -tamanho * 0.15);
+        ctx.lineTo(tamanho * 0.72, tamanho * 0.55);
+        ctx.lineTo(tamanho * 0.35, tamanho * 0.92);
+        ctx.lineTo(0, tamanho * 1.12);
+        ctx.lineTo(-tamanho * 0.35, tamanho * 0.92);
+        ctx.lineTo(-tamanho * 0.72, tamanho * 0.55);
+        ctx.lineTo(-tamanho * 0.95, -tamanho * 0.15);
+
+    } else if (formato === "hexagonal") {
+
+        ctx.moveTo(0, -tamanho * 1.08);
+        ctx.lineTo(tamanho * 0.86, -tamanho * 0.5);
+        ctx.lineTo(tamanho * 0.86, tamanho * 0.42);
+        ctx.lineTo(0, tamanho * 1.08);
+        ctx.lineTo(-tamanho * 0.86, tamanho * 0.42);
+        ctx.lineTo(-tamanho * 0.86, -tamanho * 0.5);
+
+    } else {
+
+        ctx.moveTo(0, -tamanho);
+        ctx.lineTo(tamanho, 0);
+        ctx.lineTo(0, tamanho);
+        ctx.lineTo(-tamanho, 0);
+
+    }
+
+    ctx.closePath();
+
+}
+
+function desenharPipa(pipa) {
+
+    ctx.save();
+
+
+    ctx.globalAlpha =
+        pipa.alpha;
+
+
+    ctx.translate(
+        pipa.x,
+        pipa.y
+    );
+
+
+    const tamanho =
+        pipa.tamanho;
+
+    ctx.save();
+
+    ctx.rotate(
+        pipa.angulo
+    );
+
+
+    // -----------------------------------------
+    // CORPO
+    // -----------------------------------------
+
+    criarCaminhoPipa(
+        pipa.formato,
+        tamanho
+    );
+
+
+    ctx.shadowColor =
+        pipa.cor;
+
+    ctx.shadowBlur =
+        pipa.danoFlash > 0
+            ? 18
+            : 7;
+
+    ctx.fillStyle =
+        pipa.danoFlash > 0
+            ? "#ffffff"
+            : pipa.cor;
+
+
+    ctx.fill();
+
+    ctx.shadowBlur =
+        0;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(0, -tamanho + 2);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(-tamanho + 2, 0);
+    ctx.closePath();
+
+    ctx.fillStyle =
+        "rgba(255, 255, 255, 0.18)";
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.moveTo(0, 0);
+    ctx.lineTo(tamanho - 2, 0);
+    ctx.lineTo(0, tamanho - 2);
+    ctx.closePath();
+
+    ctx.fillStyle =
+        "rgba(0, 0, 0, 0.14)";
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "#222";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.stroke();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(0, -tamanho);
+    ctx.lineTo(tamanho, 0);
+    ctx.lineTo(0, tamanho);
+
+    ctx.strokeStyle =
+        "rgba(255, 255, 255, 0.6)";
+
+    ctx.lineWidth =
+        1;
+
+    ctx.stroke();
+
+
+    if (pipa.skin === "listrada") {
+
+        ctx.beginPath();
+
+        ctx.moveTo(-tamanho + 8, -8);
+
+        ctx.lineTo(-8, -tamanho + 8);
+
+        ctx.moveTo(0, tamanho - 8);
+
+        ctx.lineTo(tamanho - 8, 0);
+
+        ctx.strokeStyle =
+            "rgba(255, 255, 255, 0.8)";
+
+        ctx.lineWidth =
+            5;
+
+        ctx.stroke();
+
+    }
+
+
+    if (pipa.skin === "estrela") {
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, -tamanho + 7);
+
+        ctx.lineTo(0, tamanho - 7);
+
+        ctx.moveTo(-tamanho + 7, 0);
+
+        ctx.lineTo(tamanho - 7, 0);
+
+        ctx.strokeStyle =
+            "rgba(255, 255, 255, 0.75)";
+
+        ctx.lineWidth =
+            4;
+
+        ctx.stroke();
+
+    }
+
+
+    if (pipa.skin === "bolinha") {
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            0,
+            7,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            "rgba(255, 255, 255, 0.75)";
+
+        ctx.fill();
+
+    }
+
+
+    if (pipa.protegida) {
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            0,
+            tamanho + 8,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.strokeStyle =
+            "rgba(255, 216, 107, 0.95)";
+
+        ctx.lineWidth =
+            3;
+
+        ctx.stroke();
+
+    }
+
+    ctx.restore();
+
+
+    // -----------------------------------------
+    // CRUZ
+    // -----------------------------------------
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        0,
+        -tamanho
+    );
+
+
+    ctx.lineTo(
+        0,
+        tamanho
+    );
+
+
+    ctx.moveTo(
+        -tamanho,
+        0
+    );
+
+
+    ctx.lineTo(
+        tamanho,
+        0
+    );
+
+
+    ctx.strokeStyle =
+        "#222";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.stroke();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        3.5,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fillStyle =
+        "#f4e4c1";
+
+    ctx.fill();
+
+    ctx.strokeStyle =
+        "#1d2730";
+
+    ctx.lineWidth =
+        1;
+
+    ctx.stroke();
+
+
+    // -----------------------------------------
+    // RABIOLA
+    // -----------------------------------------
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        0,
+        tamanho
+    );
+
+
+    ctx.quadraticCurveTo(
+
+        -20,
+
+        tamanho + 25,
+
+        8,
+
+        tamanho + 50
+
+    );
+
+
+    ctx.strokeStyle =
+        pipa.corLinha;
+
+
+    ctx.stroke();
+
+
+    for (let indice = 0; indice < 3; indice++) {
+
+        const laçoY =
+            tamanho +
+            15 +
+            indice * 15;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            indice % 2 === 0 ? -7 : 7,
+            laçoY,
+            5,
+            0,
+            Math.PI
+        );
+
+        ctx.strokeStyle =
+            pipa.corLinha;
+
+        ctx.lineWidth =
+            1.3;
+
+        ctx.stroke();
+
+    }
+
+
+    // -----------------------------------------
+    // NOME
+    // -----------------------------------------
+
+    ctx.fillStyle =
+        "#111";
+
+
+    ctx.font =
+        "bold 15px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.fillText(
+
+        pipa.nome,
+
+        0,
+
+        -tamanho - 12
+
+    );
+
+
+    const larguraBarra =
+        44;
+
+    const alturaBarra =
+        5;
+
+    ctx.fillStyle =
+        "rgba(0, 0, 0, 0.55)";
+
+    ctx.fillRect(
+        -larguraBarra / 2,
+        -tamanho - 8,
+        larguraBarra,
+        alturaBarra
+    );
+
+    ctx.fillStyle =
+        pipa.vida > 60
+            ? "#54e38e"
+            : pipa.vida > 30
+                ? "#ffd166"
+                : "#ff5c5c";
+
+    ctx.fillRect(
+        -larguraBarra / 2,
+        -tamanho - 8,
+        larguraBarra *
+            Math.max(0, pipa.vida) /
+            pipa.vidaMaxima,
+        alturaBarra
+    );
+
+
+    ctx.restore();
+
+}
+
+
+// =====================================================
+// DISTÂNCIA
+// =====================================================
+
+function distancia(
+    x1,
+    y1,
+    x2,
+    y2
+) {
+
+    const dx =
+        x1 - x2;
+
+
+    const dy =
+        y1 - y2;
+
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
+}
+
+
+// =====================================================
+// ORIENTAÇÃO DA LINHA
+// =====================================================
+
+function orientacao(
+    ax,
+    ay,
+    bx,
+    by,
+    cx,
+    cy
+) {
+
+    const valor =
+
+        (by - ay) *
+        (cx - bx)
+
+        -
+
+        (bx - ax) *
+        (cy - by);
+
+
+    if (
+        Math.abs(valor) < 0.0001
+    ) {
+
+        return 0;
+
+    }
+
+
+    return valor > 0
+        ? 1
+        : 2;
+
+}
+
+
+// =====================================================
+// VERIFICAR SE DUAS LINHAS SE CRUZAM
+// =====================================================
+
+function linhasSeCruzam(
+    p1,
+    p2,
+    p3,
+    p4
+) {
+
+    const o1 =
+        orientacao(
+            p1.x,
+            p1.y,
+            p2.x,
+            p2.y,
+            p3.x,
+            p3.y
+        );
+
+
+    const o2 =
+        orientacao(
+            p1.x,
+            p1.y,
+            p2.x,
+            p2.y,
+            p4.x,
+            p4.y
+        );
+
+
+    const o3 =
+        orientacao(
+            p3.x,
+            p3.y,
+            p4.x,
+            p4.y,
+            p1.x,
+            p1.y
+        );
+
+
+    const o4 =
+        orientacao(
+            p3.x,
+            p3.y,
+            p4.x,
+            p4.y,
+            p2.x,
+            p2.y
+        );
+
+
+    return (
+        o1 !== o2 &&
+        o3 !== o4
+    );
+
+}
+
+
+// =====================================================
+// CORTAR PIPA
+// =====================================================
+
+function cortarPipa(pipa, cortadora) {
+
+    if (
+        pipa.cortada
+    ) {
+
+        return;
+
+    }
+
+
+    if (pipa.protegida) {
+
+        pipa.protegida = false;
+
+        criarEfeito(
+            pipa.x,
+            pipa.y
+        );
+
+        interfaceTexto.textContent =
+            "🛡️ " +
+            pipa.nome +
+            " bloqueou o corte!";
+
+        return;
+
+    }
+
+
+    pipa.cortada =
+        true;
+
+    cortesNaRodada++;
+
+    tocarSomCorte();
+
+    registrarCorte(
+        cortadora &&
+            cortadora.nome
+    );
+
+
+    pipa.tempoMorte =
+        0;
+
+
+    // sobe
+
+    pipa.velocidadeY =
+        -2.5;
+
+
+    // vai para um lado
+
+    pipa.velocidadeX +=
+        (
+            Math.random() > 0.5
+                ? 1
+                : -1
+        );
+
+
+    // efeito
+
+    criarEfeito(
+        pipa.x,
+        pipa.y
+    );
+
+
+    mostrarAvisoCombate(
+        "✂️ " +
+        (cortadora
+            ? cortadora.nome
+            : "Uma pipa") +
+        " cortou " +
+        pipa.nome + "!"
+    );
+
+
+    setTimeout(
+        function() {
+
+            if (avisoCombate <= 0) {
+
+                interfaceTexto.textContent =
+                    "LIVE PRONTA · AGUARDANDO JOGADORES";
+
+                interfaceTexto.classList.remove(
+                    "combate"
+                );
+
+            }
+
+        },
+        1500
+    );
+
+}
+
+
+function causarDano(pipa, dano, cortadora) {
+
+    if (pipa.protegida) {
+
+        pipa.protegida = false;
+
+        criarFaiscas(
+            pipa.x,
+            pipa.y
+        );
+
+        interfaceTexto.textContent =
+            "🛡️ " +
+            pipa.nome +
+            " bloqueou o dano!";
+
+        return;
+
+    }
+
+
+    pipa.vida -= dano;
+
+    pipa.danoFlash =
+        8;
+
+    criarFaiscas(
+        pipa.x,
+        pipa.y
+    );
+
+
+    if (pipa.vida <= 0) {
+
+        cortarPipa(
+            pipa,
+            cortadora
+        );
+
+        return;
+
+    }
+
+
+    interfaceTexto.textContent =
+        "⚡ " +
+        pipa.nome +
+        " perdeu " +
+        dano +
+        " de vida!";
+
+}
+
+
+// =====================================================
+// VERIFICAR LINHAS
+// =====================================================
+
+function verificarCortes() {
+
+    const agora =
+        Date.now();
+
+
+    for (
+        let i = 0;
+        i < pipas.length;
+        i++
+    ) {
+
+        const a =
+            pipas[i];
+
+
+        if (
+            !a.ativa ||
+            a.cortada
+        ) {
+
+            continue;
+
+        }
+
+
+        for (
+            let j = i + 1;
+            j < pipas.length;
+            j++
+        ) {
+
+            const b =
+                pipas[j];
+
+
+            if (
+                !b.ativa ||
+                b.cortada
+            ) {
+
+                continue;
+
+            }
+
+
+            // evita corte repetido
+
+            if (
+                agora -
+                a.ultimoCorte
+                < 700
+            ) {
+
+                continue;
+
+            }
+
+
+            if (
+                agora -
+                b.ultimoCorte
+                < 700
+            ) {
+
+                continue;
+
+            }
+
+
+            const linhaAInicio = {
+
+                x: a.ancoraX,
+
+                y: a.ancoraY
+
+            };
+
+
+            const linhaAFim = {
+
+                x: a.x,
+
+                y: a.y
+
+            };
+
+
+            const linhaBInicio = {
+
+                x: b.ancoraX,
+
+                y: b.ancoraY
+
+            };
+
+
+            const linhaBFim = {
+
+                x: b.x,
+
+                y: b.y
+
+            };
+
+
+            if (
+                linhasSeCruzam(
+
+                    linhaAInicio,
+
+                    linhaAFim,
+
+                    linhaBInicio,
+
+                    linhaBFim
+
+                )
+            ) {
+
+                a.ultimoCorte =
+                    agora;
+
+                b.ultimoCorte =
+                    agora;
+
+
+                // --------------------------------
+                // ESCOLHE QUEM PERDE
+                // --------------------------------
+
+                const perdedora =
+                    Math.random() < 0.5
+                        ? a
+                        : b;
+
+                const cortadora =
+                    perdedora === a
+                        ? b
+                        : a;
+
+
+                causarDano(
+                    perdedora,
+                    35,
+                    cortadora
+                );
+
+                criarFaiscas(
+                    (a.x + b.x) / 2,
+                    (a.y + b.y) / 2
+                );
+
+
+                break;
+
+            }
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// CRIAR EFEITO
+// =====================================================
+
+function criarEfeito(
+    x,
+    y
+) {
+
+    for (
+        let i = 0;
+        i < 18;
+        i++
+    ) {
+
+        const angulo =
+            Math.random() *
+            Math.PI *
+            2;
+
+
+        const velocidade =
+            1 +
+            Math.random() * 3;
+
+
+        efeitos.push({
+
+            x: x,
+
+            y: y,
+
+            velocidadeX:
+                Math.cos(angulo) *
+                velocidade,
+
+            velocidadeY:
+                Math.sin(angulo) *
+                velocidade,
+
+            vida: 35,
+
+            tamanho:
+                2 +
+                Math.random() * 4
+
+        });
+
+    }
+
+}
+
+
+function criarFaiscas(
+    x,
+    y
+) {
+
+    for (
+        let i = 0;
+        i < 12;
+        i++
+    ) {
+
+        const angulo =
+            Math.random() *
+            Math.PI *
+            2;
+
+        const velocidade =
+            2 +
+            Math.random() *
+            3;
+
+        efeitos.push({
+
+            tipo: "faisca",
+
+            x: x,
+
+            y: y,
+
+            velocidadeX:
+                Math.cos(angulo) *
+                velocidade,
+
+            velocidadeY:
+                Math.sin(angulo) *
+                velocidade,
+
+            vida: 24,
+
+            tamanho:
+                5 +
+                Math.random() *
+                7
+
+        });
+
+    }
+
+}
+
+
+// =====================================================
+// ATUALIZAR EFEITOS
+// =====================================================
+
+function atualizarEfeitos() {
+
+    for (
+        let i = efeitos.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const efeito =
+            efeitos[i];
+
+
+        efeito.x +=
+            efeito.velocidadeX;
+
+
+        efeito.y +=
+            efeito.velocidadeY;
+
+
+        efeito.velocidadeY +=
+            0.03;
+
+
+        efeito.vida--;
+
+
+        if (
+            efeito.vida <= 0
+        ) {
+
+            efeitos.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+function atualizarNotificacoes() {
+
+    for (
+        let i = notificacoes.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        notificacoes[i].vida--;
+
+        if (notificacoes[i].vida <= 0) {
+
+            notificacoes.splice(i, 1);
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// DESENHAR EFEITOS
+// =====================================================
+
+function desenharEfeitos() {
+
+    for (
+        const efeito of efeitos
+    ) {
+
+        ctx.save();
+
+
+        ctx.globalAlpha =
+            efeito.vida / 35;
+
+
+        ctx.beginPath();
+
+
+        if (efeito.tipo === "faisca") {
+
+            ctx.moveTo(
+                efeito.x,
+                efeito.y
+            );
+
+            ctx.lineTo(
+                efeito.x -
+                    efeito.velocidadeX *
+                    efeito.tamanho,
+                efeito.y -
+                    efeito.velocidadeY *
+                    efeito.tamanho
+            );
+
+            ctx.strokeStyle =
+                "#ffffff";
+
+            ctx.lineWidth =
+                2;
+
+            ctx.stroke();
+
+        } else {
+
+            ctx.arc(
+                efeito.x,
+                efeito.y,
+                efeito.tamanho,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                "#ffffff";
+
+            ctx.fill();
+
+        }
+
+
+        ctx.restore();
+
+    }
+
+}
+
+
+function desenharNotificacoes() {
+
+    ctx.save();
+
+    ctx.textAlign =
+        "left";
+
+    ctx.font =
+        "bold 12px Arial";
+
+    notificacoes.forEach(
+        (notificacao, indice) => {
+
+            ctx.globalAlpha =
+                Math.min(1, notificacao.vida / 35);
+
+            ctx.fillStyle =
+                "rgba(8, 18, 31, 0.62)";
+
+            ctx.fillRect(
+                22,
+                350 + indice * 25,
+                225,
+                20
+            );
+
+            ctx.fillStyle =
+                notificacao.cor;
+
+            ctx.fillText(
+                notificacao.texto,
+                30,
+                364 + indice * 25
+            );
+
+        }
+    );
+
+    ctx.restore();
+
+}
+
+
+// =====================================================
+// DESENHAR FUNDO
+// =====================================================
+
+function desenharMapaDia() {
+
+    const tempo =
+        Date.now() *
+        0.00008;
+
+    const ceu =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            canvas.height
+        );
+
+    ceu.addColorStop(0, "#0c64d8");
+    ceu.addColorStop(0.38, "#2f8de3");
+    ceu.addColorStop(0.72, "#9bcff2");
+    ceu.addColorStop(1, "#efbf86");
+
+    ctx.fillStyle =
+        ceu;
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    const nuvens = [
+        { x: 70, y: 140, escala: 1.1 },
+        { x: 360, y: 220, escala: 0.7 },
+        { x: 210, y: 300, escala: 0.48 }
+    ];
+
+
+    for (const nuvem of nuvens) {
+
+        const x =
+            (nuvem.x + tempo * 10) %
+            (canvas.width + 150) -
+            75;
+
+        const y =
+            nuvem.y;
+
+        const escala =
+            nuvem.escala;
+
+        ctx.save();
+
+        ctx.globalAlpha =
+            0.24;
+
+        ctx.fillStyle =
+            "#ffffff";
+
+        ctx.beginPath();
+
+        ctx.arc(x, y, 22 * escala, 0, Math.PI * 2);
+        ctx.arc(x + 24 * escala, y - 12 * escala, 30 * escala, 0, Math.PI * 2);
+        ctx.arc(x + 55 * escala, y, 21 * escala, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+    }
+
+    ctx.save();
+
+    ctx.globalAlpha =
+        0.13;
+
+    ctx.fillStyle =
+        "#ffffff";
+
+    for (let indice = 0; indice < 3; indice++) {
+
+        const x =
+            18 + indice * 190 +
+            Math.sin(tempo * 12 + indice) * 10;
+
+        const y =
+            290 + indice * 76;
+
+        ctx.beginPath();
+        ctx.ellipse(x, y, 58, 9, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 34, y - 4, 42, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+    }
+
+    ctx.restore();
+
+    ctx.save();
+
+    ctx.strokeStyle =
+        "rgba(32, 67, 82, 0.46)";
+
+    ctx.lineWidth =
+        1.4;
+
+    for (let indice = 0; indice < 5; indice++) {
+
+        const x =
+            (70 + indice * 100 + Math.sin(tempo * 8 + indice) * 8) %
+            canvas.width;
+
+        const y =
+            245 + (indice % 2) * 45;
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(x + 6, y - 5, x + 12, y);
+        ctx.quadraticCurveTo(x + 18, y - 5, x + 24, y);
+        ctx.stroke();
+
+    }
+
+    ctx.restore();
+
+
+    ctx.save();
+
+    ctx.strokeStyle =
+        "rgba(35, 68, 70, 0.5)";
+
+    ctx.lineWidth =
+        1.4;
+
+    for (let indice = 0; indice < 4; indice++) {
+
+        const x =
+            58 + indice * 138;
+
+        ctx.beginPath();
+        ctx.moveTo(x, 760);
+        ctx.lineTo(x + 18, 720);
+        ctx.lineTo(x + 34, 760);
+        ctx.stroke();
+
+    }
+
+    ctx.strokeStyle =
+        "rgba(28, 54, 56, 0.58)";
+
+    ctx.beginPath();
+    ctx.moveTo(18, 690);
+    ctx.quadraticCurveTo(110, 670, 200, 690);
+    ctx.quadraticCurveTo(300, 710, 390, 682);
+    ctx.quadraticCurveTo(455, 665, 522, 690);
+    ctx.stroke();
+
+    ctx.fillStyle =
+        "rgba(38, 87, 62, 0.66)";
+
+    for (let indice = 0; indice < 10; indice++) {
+
+        const x =
+            18 + indice * 54;
+
+        const y =
+            704 + (indice % 3) * 10;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 15, 0, Math.PI * 2);
+        ctx.arc(x + 13, y + 3, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+    }
+
+    ctx.strokeStyle =
+        "rgba(20, 43, 50, 0.7)";
+
+    ctx.lineWidth =
+        2;
+
+    for (let indice = 0; indice < 3; indice++) {
+
+        const x =
+            82 + indice * 175;
+
+        ctx.beginPath();
+        ctx.moveTo(x, 650);
+        ctx.lineTo(x, 790);
+        ctx.moveTo(x - 22, 670);
+        ctx.lineTo(x + 22, 670);
+        ctx.stroke();
+
+    }
+
+    ctx.strokeStyle =
+        "rgba(255, 255, 255, 0.56)";
+
+    ctx.lineWidth =
+        2;
+
+    ctx.beginPath();
+    ctx.moveTo(112, 682);
+    ctx.quadraticCurveTo(180, 695, 250, 682);
+    ctx.stroke();
+
+    ctx.fillStyle =
+        "#d94f70";
+
+    ctx.fillRect(150, 686, 10, 17);
+
+    ctx.fillStyle =
+        "#f0c94e";
+
+    ctx.fillRect(165, 689, 9, 14);
+
+    ctx.restore();
+
+
+    // Morros em camadas criam profundidade sem competir com as pipas.
+    ctx.fillStyle =
+        "rgba(24, 62, 112, 0.34)";
+
+    ctx.beginPath();
+
+    ctx.moveTo(0, canvas.height - 210);
+    ctx.quadraticCurveTo(120, canvas.height - 310, 220, canvas.height - 210);
+    ctx.quadraticCurveTo(360, canvas.height - 330, canvas.width, canvas.height - 205);
+    ctx.lineTo(canvas.width, canvas.height - 35);
+    ctx.lineTo(0, canvas.height - 35);
+    ctx.fill();
+
+
+    ctx.fillStyle =
+        "rgba(18, 43, 86, 0.7)";
+
+    ctx.beginPath();
+
+    ctx.moveTo(0, canvas.height - 135);
+    ctx.quadraticCurveTo(90, canvas.height - 220, 170, canvas.height - 140);
+    ctx.quadraticCurveTo(300, canvas.height - 230, 430, canvas.height - 145);
+    ctx.quadraticCurveTo(520, canvas.height - 180, canvas.width, canvas.height - 125);
+    ctx.lineTo(canvas.width, canvas.height - 35);
+    ctx.lineTo(0, canvas.height - 35);
+    ctx.fill();
+
+
+    const casas = [
+        { x: 8, y: 760, w: 36, h: 52, cor: "#233545" },
+        { x: 42, y: 738, w: 30, h: 74, cor: "#2d4050" },
+        { x: 72, y: 775, w: 42, h: 37, cor: "#1d2b3a" },
+        { x: 108, y: 718, w: 34, h: 94, cor: "#32485e" },
+        { x: 140, y: 750, w: 40, h: 62, cor: "#243b4f" },
+        { x: 178, y: 732, w: 31, h: 80, cor: "#1b2e40" },
+        { x: 205, y: 770, w: 42, h: 42, cor: "#2d4256" },
+        { x: 245, y: 710, w: 38, h: 102, cor: "#243749" },
+        { x: 284, y: 755, w: 48, h: 57, cor: "#1b3042" },
+        { x: 332, y: 726, w: 34, h: 86, cor: "#334d61" },
+        { x: 366, y: 770, w: 44, h: 42, cor: "#253d4f" },
+        { x: 410, y: 738, w: 40, h: 74, cor: "#1d2e3f" },
+        { x: 450, y: 760, w: 54, h: 52, cor: "#2c4359" }
+    ];
+
+
+    for (const casa of casas) {
+
+        ctx.fillStyle =
+            casa.cor;
+
+        ctx.fillRect(
+            casa.x,
+            casa.y,
+            casa.w,
+            casa.h
+        );
+
+        ctx.beginPath();
+
+        ctx.moveTo(casa.x - 5, casa.y);
+        ctx.lineTo(casa.x + casa.w / 2, casa.y - 16);
+        ctx.lineTo(casa.x + casa.w + 5, casa.y);
+        ctx.fill();
+
+        ctx.fillStyle =
+            "rgba(255, 211, 92, 0.25)";
+
+        ctx.fillRect(
+            casa.x + 10,
+            casa.y + 18,
+            6,
+            8
+        );
+
+        ctx.fillRect(
+            casa.x + casa.w - 17,
+            casa.y + 18,
+            6,
+            8
+        );
+
+        ctx.fillStyle =
+            "rgba(255, 211, 92, 0.18)";
+
+        ctx.fillRect(
+            casa.x + casa.w / 2 - 4,
+            casa.y + casa.h - 22,
+            8,
+            22
+        );
+
+    }
+
+
+    // Fios e postes reforcam a leitura de comunidade no morro.
+    ctx.strokeStyle =
+        "rgba(17, 27, 32, 0.45)";
+
+    ctx.lineWidth =
+        1;
+
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - 102);
+    ctx.quadraticCurveTo(150, canvas.height - 132, 290, canvas.height - 104);
+    ctx.quadraticCurveTo(410, canvas.height - 132, canvas.width, canvas.height - 96);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(92, canvas.height - 154);
+    ctx.lineTo(92, canvas.height - 35);
+    ctx.moveTo(365, canvas.height - 165);
+    ctx.lineTo(365, canvas.height - 35);
+    ctx.stroke();
+
+    // sol
+
+    const solX =
+        canvas.width - 70;
+
+    const solY =
+        80;
+
+    const brilho =
+        ctx.createRadialGradient(
+            solX,
+            solY,
+            18,
+            solX,
+            solY,
+            82
+        );
+
+    brilho.addColorStop(
+        0,
+        `rgba(255, 249, 190, ${0.82 + Math.sin(tempo * 1.2) * 0.08})`
+    );
+
+    brilho.addColorStop(
+        0.45,
+        "rgba(255, 220, 80, 0.3)"
+    );
+
+    brilho.addColorStop(
+        1,
+        "rgba(255, 220, 80, 0)"
+    );
+
+    ctx.fillStyle =
+        brilho;
+
+    ctx.beginPath();
+    ctx.arc(solX, solY, 82, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+
+    ctx.strokeStyle =
+        "rgba(255, 232, 123, 0.42)";
+
+    ctx.lineWidth =
+        2;
+
+    for (let i = 0; i < 12; i++) {
+
+        const angulo =
+            i * Math.PI / 6;
+
+        ctx.beginPath();
+        ctx.moveTo(
+            solX + Math.cos(angulo) * 48,
+            solY + Math.sin(angulo) * 48
+        );
+        ctx.lineTo(
+            solX + Math.cos(angulo) * 62,
+            solY + Math.sin(angulo) * 62
+        );
+        ctx.stroke();
+
+    }
+
+    ctx.fillStyle =
+        "rgba(255, 224, 99, 0.82)";
+
+    ctx.beginPath();
+    ctx.arc(solX, solY, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+
+
+    // chão
+
+    ctx.fillStyle =
+        "rgba(239, 191, 134, 0.58)";
+
+
+    ctx.fillRect(
+
+        0,
+
+        canvas.height - 35,
+
+        canvas.width,
+
+        35
+
+    );
+
+}
+
+
+function desenharMapaNoite() {
+
+    const gradiente =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            canvas.height
+        );
+
+    gradiente.addColorStop(0, "#08152d");
+    gradiente.addColorStop(0.34, "#10294b");
+    gradiente.addColorStop(0.62, "#244c70");
+    gradiente.addColorStop(0.82, "#513e5c");
+    gradiente.addColorStop(1, "#211b31");
+
+    ctx.fillStyle = gradiente;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const brilhoHorizonte =
+        ctx.createLinearGradient(
+            0,
+            420,
+            0,
+            760
+        );
+
+    brilhoHorizonte.addColorStop(
+        0,
+        "rgba(102, 176, 219, 0)"
+    );
+
+    brilhoHorizonte.addColorStop(
+        0.65,
+        "rgba(255, 165, 103, 0.07)"
+    );
+
+    brilhoHorizonte.addColorStop(
+        1,
+        "rgba(255, 165, 103, 0)"
+    );
+
+    ctx.fillStyle =
+        brilhoHorizonte;
+
+    ctx.fillRect(
+        0,
+        420,
+        canvas.width,
+        340
+    );
+
+    ctx.save();
+
+    ctx.globalAlpha =
+        0.82;
+
+    ctx.fillStyle =
+        "#fff4bd";
+
+    ctx.beginPath();
+    ctx.arc(canvas.width - 82, 92, 38, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha =
+        0.16;
+
+    ctx.fillStyle =
+        "#d6e6ff";
+
+    ctx.beginPath();
+    ctx.arc(canvas.width - 94, 82, 64, 0, Math.PI * 2);
+    ctx.fill();
+
+        ctx.globalAlpha =
+            0.9;
+
+    ctx.fillStyle =
+        "#d8e9ff";
+
+    for (let i = 0; i < 44; i++) {
+
+        const x =
+            (i * 83 + 31) % canvas.width;
+
+        const y =
+            32 + (i * 47) % 470;
+
+        const tamanho =
+            i % 5 === 0 ? 2 : 1;
+
+        ctx.globalAlpha =
+            0.55 +
+            Math.sin(Date.now() * 0.0008 + i) *
+            0.35;
+
+        ctx.fillRect(x, y, tamanho, tamanho);
+
+    }
+
+    ctx.restore();
+
+    ctx.fillStyle =
+        "rgba(10, 18, 32, 0.72)";
+
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - 210);
+    ctx.quadraticCurveTo(130, canvas.height - 330, 255, canvas.height - 220);
+    ctx.quadraticCurveTo(390, canvas.height - 345, canvas.width, canvas.height - 210);
+    ctx.lineTo(canvas.width, canvas.height - 35);
+    ctx.lineTo(0, canvas.height - 35);
+    ctx.fill();
+
+    ctx.save();
+
+    ctx.strokeStyle =
+        "rgba(106, 196, 255, 0.34)";
+
+    ctx.lineWidth =
+        1;
+
+    for (let indice = 0; indice < 5; indice++) {
+
+        const x =
+            42 + indice * 112;
+
+        ctx.beginPath();
+        ctx.moveTo(x, 650);
+        ctx.lineTo(x, 790);
+        ctx.moveTo(x - 18, 670);
+        ctx.lineTo(x + 18, 670);
+        ctx.stroke();
+
+    }
+
+    ctx.strokeStyle =
+        "rgba(84, 170, 235, 0.3)";
+
+    ctx.beginPath();
+    ctx.moveTo(0, 690);
+    ctx.quadraticCurveTo(120, 660, 245, 690);
+    ctx.quadraticCurveTo(370, 722, 540, 682);
+    ctx.stroke();
+
+    ctx.fillStyle =
+        "rgba(255, 196, 75, 0.7)";
+
+    for (let indice = 0; indice < 9; indice++) {
+
+        const x =
+            25 + indice * 63;
+
+        const y =
+            688 + (indice % 2) * 22;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+    }
+
+    ctx.fillStyle =
+        "rgba(113, 210, 255, 0.5)";
+
+    ctx.font =
+        "bold 10px Arial";
+
+    ctx.fillText("PIPA", 22, 665);
+
+    ctx.fillStyle =
+        "rgba(255, 210, 90, 0.2)";
+
+    ctx.fillRect(250, 655, 72, 24);
+
+    ctx.fillStyle =
+        "rgba(255, 232, 170, 0.7)";
+
+    ctx.font =
+        "bold 9px Arial";
+
+    ctx.fillText("COMBATE", 258, 671);
+
+    ctx.restore();
+
+    const cidade = [
+        { x: 8, y: 750, w: 48, h: 68 },
+        { x: 52, y: 720, w: 38, h: 98 },
+        { x: 88, y: 770, w: 52, h: 48 },
+        { x: 136, y: 735, w: 45, h: 83 },
+        { x: 177, y: 690, w: 38, h: 128 },
+        { x: 214, y: 760, w: 54, h: 58 },
+        { x: 266, y: 720, w: 44, h: 98 },
+        { x: 306, y: 680, w: 37, h: 138 },
+        { x: 340, y: 750, w: 56, h: 68 },
+        { x: 394, y: 710, w: 43, h: 108 },
+        { x: 435, y: 760, w: 52, h: 58 },
+        { x: 480, y: 725, w: 45, h: 93 }
+    ];
+
+    for (const predio of cidade) {
+
+        ctx.fillStyle =
+            "rgba(14, 22, 35, 0.92)";
+
+        ctx.fillRect(
+            predio.x,
+            predio.y,
+            predio.w,
+            predio.h
+        );
+
+        for (let janela = 0; janela < 3; janela++) {
+
+            const brilhoJanela =
+                0.48 +
+                Math.sin(Date.now() * 0.0004 + predio.x + janela) *
+                0.16;
+
+            ctx.fillStyle =
+                janela % 3 === 0
+                    ? `rgba(255, 202, 88, ${brilhoJanela})`
+                    : "rgba(106, 206, 255, 0.34)";
+
+            ctx.fillRect(
+                predio.x + 9 + (janela % 2) * 20,
+                predio.y + 13 + Math.floor(janela / 2) * 25,
+                7,
+                10
+            );
+
+        }
+
+    }
+
+    ctx.strokeStyle =
+        "rgba(103, 196, 255, 0.35)";
+
+    ctx.lineWidth =
+        1;
+
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - 108);
+    ctx.quadraticCurveTo(170, canvas.height - 145, 330, canvas.height - 112);
+    ctx.quadraticCurveTo(430, canvas.height - 142, canvas.width, canvas.height - 105);
+    ctx.stroke();
+
+    ctx.fillStyle =
+        "rgba(7, 13, 24, 0.88)";
+
+    ctx.fillRect(0, canvas.height - 35, canvas.width, 35);
+
+}
+
+
+function desenharFundo() {
+
+    if (mapaAtual === 2) {
+
+        desenharMapaNoite();
+
+        return;
+
+    }
+
+    desenharMapaDia();
+
+}
+
+
+function desenharClima() {
+
+    if (climaAtual === "ceu") {
+
+        return;
+
+    }
+
+    ctx.save();
+
+    if (climaAtual === "vento") {
+
+        ctx.strokeStyle =
+            "rgba(255, 255, 255, 0.28)";
+
+        ctx.lineWidth =
+            2;
+
+        for (let i = 0; i < 9; i++) {
+
+            const y =
+                150 + i * 74;
+
+            ctx.beginPath();
+            ctx.moveTo(25 + i * 31, y);
+            ctx.quadraticCurveTo(
+                100 + i * 31,
+                y - 10,
+                175 + i * 31,
+                y
+            );
+            ctx.stroke();
+
+        }
+
+    }
+
+    if (climaAtual === "chuva") {
+
+        ctx.strokeStyle =
+            "rgba(150, 215, 255, 0.34)";
+
+        ctx.lineWidth =
+            1;
+
+        for (let i = 0; i < 35; i++) {
+
+            const x =
+                (i * 47 + Date.now() * 0.08) %
+                canvas.width;
+
+            const y =
+                (i * 83 + Date.now() * 0.16) %
+                canvas.height;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - 7, y + 18);
+            ctx.stroke();
+
+        }
+
+    }
+
+    ctx.restore();
+
+}
+
+
+function desenharHudNaArena() {
+
+    const jogadores =
+        Array.from(pontuacao.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3);
+
+    const minutos =
+        Math.floor(segundosRodada / 60)
+            .toString()
+            .padStart(2, "0");
+
+    const segundos =
+        Math.max(0, segundosRodada % 60)
+            .toString()
+            .padStart(2, "0");
+
+    ctx.save();
+
+    ctx.fillStyle =
+        "rgba(8, 18, 31, 0.48)";
+
+    ctx.fillRect(
+        12,
+        14,
+        canvas.width - 24,
+        58
+    );
+
+    ctx.strokeStyle =
+        "rgba(142, 231, 255, 0.3)";
+
+    ctx.lineWidth =
+        1;
+
+    ctx.strokeRect(
+        12,
+        14,
+        canvas.width - 24,
+        58
+    );
+
+    ctx.fillStyle =
+        "rgba(255, 255, 255, 0.9)";
+
+    ctx.font =
+        "bold 16px Arial";
+
+    ctx.textAlign =
+        "left";
+
+    ctx.fillText(
+        "RODADA " + rodada,
+        24,
+        38
+    );
+
+    ctx.fillStyle =
+        "#8ee7ff";
+
+    ctx.font =
+        "bold 14px Arial";
+
+    ctx.fillText(
+        minutos + ":" + segundos,
+        24,
+        58
+    );
+
+    ctx.textAlign =
+        "right";
+
+    ctx.fillStyle =
+        "rgba(255, 255, 255, 0.82)";
+
+    ctx.font =
+        "bold 12px Arial";
+
+    ctx.fillText(
+        "APOIO " + apoioTotal,
+        canvas.width - 24,
+        38
+    );
+
+    ctx.fillStyle =
+        "rgba(142, 231, 255, 0.75)";
+
+    ctx.font =
+        "11px Arial";
+
+    ctx.fillText(
+        statusLive.textContent.replace("● ", ""),
+        canvas.width - 24,
+        57
+    );
+
+    ctx.textAlign =
+        "center";
+
+    ctx.fillStyle =
+        mapaAtual === 2
+            ? "#bcd7ff"
+            : "#ffe08a";
+
+    ctx.font =
+        "bold 11px Arial";
+
+    ctx.fillText(
+        `MAPA ${mapaAtual}  ☀ ${votosMapa[1]}  ☾ ${votosMapa[2]}`,
+        canvas.width / 2,
+        38
+    );
+
+    ctx.fillStyle =
+        "rgba(255, 255, 255, 0.6)";
+
+    ctx.font =
+        "10px Arial";
+
+    ctx.fillText(
+        "Vote: !mapa1 ou !mapa2",
+        canvas.width / 2,
+        57
+    );
+
+    ctx.textAlign =
+        "left";
+
+        ctx.fillStyle =
+            "rgba(8, 18, 31, 0.42)";
+
+        const rankingX =
+            canvas.width - 188;
+
+        const rankingY =
+            300;
+
+        const rankingAltura =
+            jogadores.length
+                ? 52 + jogadores.length * 18
+                : 44;
+
+        ctx.fillRect(
+            rankingX,
+            rankingY,
+            176,
+            rankingAltura
+        );
+
+        ctx.fillStyle =
+            "rgba(255, 216, 107, 0.92)";
+
+        ctx.font =
+            "bold 11px Arial";
+
+        ctx.fillText(
+            "TOP DA RODADA",
+            rankingX + 10,
+            rankingY + 17
+        );
+
+        if (jogadores.length) {
+
+            ctx.fillStyle =
+                "#ffffff";
+
+            ctx.font =
+                "bold 10px Arial";
+
+            const nomeLider =
+                jogadores[0][0].length > 18
+                    ? jogadores[0][0].slice(0, 17) + "..."
+                    : jogadores[0][0];
+
+            ctx.fillText(
+                "LIDER: " + nomeLider,
+                rankingX + 10,
+                rankingY + 34
+            );
+
+        }
+
+        jogadores.forEach(
+            (jogador, indice) => {
+
+                ctx.fillStyle =
+                    "rgba(255, 255, 255, 0.8)";
+
+                ctx.font =
+                    "11px Arial";
+
+                const nomeJogador =
+                    jogador[0].length > 16
+                        ? jogador[0].slice(0, 15) + "..."
+                        : jogador[0];
+
+                ctx.fillText(
+                    `${indice === 0 ? "🥇" : indice === 1 ? "🥈" : "🥉"} ${nomeJogador}  ${jogador[1]} pts`,
+                    rankingX + 10,
+                    rankingY + 52 + indice * 18
+                );
+
+            }
+        );
+
+        if (!jogadores.length) {
+
+            ctx.fillStyle =
+                "rgba(255, 255, 255, 0.62)";
+
+            ctx.font =
+                "11px Arial";
+
+            ctx.fillText(
+                cortesNaRodada
+                    ? `Cortes: ${cortesNaRodada}`
+                    : "Aguardando cortes...",
+                rankingX + 10,
+                rankingY + 35
+            );
+
+        }
+
+
+    ctx.restore();
+
+}
+
+
+// =====================================================
+// REMOVER PIPAS MORTAS
+// =====================================================
+
+function removerPipasMortas() {
+
+    for (
+        let i = pipas.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        if (
+            !pipas[i].ativa
+        ) {
+
+            pipas.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    reorganizarAncoras();
+
+}
+
+
+// =====================================================
+// LOOP PRINCIPAL
+// =====================================================
+
+function conectarLive() {
+
+    const protocolo =
+        window.location.protocol === "https:"
+            ? "wss:"
+            : "ws:";
+
+    const endereco =
+        window.location.protocol === "file:"
+            ? "ws://localhost:3000"
+            : protocolo + "//" + window.location.host;
+
+    const socket =
+        new WebSocket(endereco);
+
+
+    socket.addEventListener(
+        "open",
+        function() {
+
+            statusLive.textContent =
+                "● Ponte conectada";
+
+        }
+    );
+
+
+    socket.addEventListener(
+        "message",
+        function(mensagem) {
+
+            try {
+
+                const evento =
+                    JSON.parse(mensagem.data);
+
+
+                if (evento.type === "status") {
+
+                    statusLive.textContent = evento.connected
+                        ? "● TikTok conectado"
+                        : "○ Live aguardando";
+
+                }
+
+
+                if (evento.type === "gift") {
+
+                    processarPresenteLive(evento);
+
+                }
+
+
+                if (evento.type === "chat") {
+
+                    processarMensagemLive(evento);
+
+                }
+
+            } catch (erro) {
+
+                console.error(
+                    "Evento inválido recebido da live:",
+                    erro
+                );
+
+            }
+
+        }
+    );
+
+
+    socket.addEventListener(
+        "close",
+        function() {
+
+            statusLive.textContent =
+                "○ Reconectando...";
+
+            setTimeout(
+                conectarLive,
+                3000
+            );
+
+        }
+    );
+
+
+    socket.addEventListener(
+        "error",
+        function() {
+
+            statusLive.textContent =
+                "○ Servidor offline";
+
+        }
+    );
+
+}
+
+
+carregarConfiguracaoApp()
+    .finally(() => {
+        conectarLive();
+    });
+
+function jogo() {
+
+    frameJogo++;
+
+    if (avisoCombate > 0) {
+
+        avisoCombate--;
+
+        if (avisoCombate === 0) {
+
+            interfaceTexto.textContent =
+                "LIVE PRONTA · AGUARDANDO JOGADORES";
+
+            interfaceTexto.classList.remove(
+                "combate"
+            );
+
+        }
+
+    }
+
+    atualizarRelogioRodada();
+
+    atualizarPromptParticipacao();
+    criarRivalAutomatico();
+
+    atualizarNotificacoes();
+
+    escalaTempo =
+        Math.min(1, escalaTempo + 0.035);
+
+    if (impactoTela > 0) {
+
+        impactoTela--;
+
+    }
+
+    ctx.clearRect(
+
+        0,
+
+        0,
+
+        canvas.width,
+
+        canvas.height
+
+    );
+
+    ctx.save();
+
+    if (impactoTela > 0) {
+
+        ctx.translate(
+            (Math.random() - 0.5) * impactoTela,
+            (Math.random() - 0.5) * impactoTela
+        );
+
+    }
+
+
+    // fundo
+
+    desenharFundo();
+
+    desenharClima();
+
+
+    // movimento
+
+    if (
+        escalaTempo >= 0.98 ||
+        frameJogo % 2 === 0
+    ) {
+
+        for (
+            const pipa of pipas
+        ) {
+
+            atualizarPipa(
+                pipa
+            );
+
+        }
+
+    }
+
+
+    // verificar cortes
+
+    verificarCortes();
+
+
+    // efeitos
+
+    atualizarEfeitos();
+
+
+    // linhas
+
+    for (
+        const pipa of pipas
+    ) {
+
+        desenharLinha(
+            pipa
+        );
+
+        desenharAncora(
+            pipa
+        );
+
+    }
+
+
+    // pipas
+
+    for (
+        const pipa of pipas
+    ) {
+
+        desenharPipa(
+            pipa
+        );
+
+    }
+
+
+    // efeitos
+
+    desenharEfeitos();
+
+    desenharNotificacoes();
+
+
+    // HUD visível dentro da fonte capturada pelo Live Studio.
+
+    desenharHudNaArena();
+
+    ctx.restore();
+
+
+    // remover
+
+    removerPipasMortas();
+
+
+    requestAnimationFrame(
+        jogo
+    );
+
+}
+
+
+// =====================================================
+// INICIAR
+// =====================================================
+
+jogo();
+
+
+</script>
+
+</body>
+
+</html>

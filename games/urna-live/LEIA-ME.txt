@@ -1,0 +1,5 @@
+URNA LIVE v18 — INÍCIO FÁCIL
+
+WINDOWS: extraia o ZIP e dê dois cliques em INICIAR-URNA-LIVE.bat.
+Precisa ter Python 3.10+ instalado. O aplicativo instala a dependência na primeira execução.
+Leia README.md para o guia completo, configuração e licença.
